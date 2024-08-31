@@ -1,118 +1,174 @@
 #include <iostream>
+#include <iomanip>
+#include <vector>
+#include <string>
+
 using namespace std;
 
-void Main_Menu();
+// Function declarations
+void mainMenu();
+void drawDivider();
+void orderPizzas(float& currentCredits);
+void chooseTopping(float& currentCredits, vector<string>& pizzaToppings, float& pizzaPrice);
 
-// dividers for the UI
-void Dividers()
-{
-    string line = "-";
-
-    for (int i = 0; i <= 50; i++)
-    {
-        cout << line;
-    };
-
+// Function to draw a line divider for the UI
+void drawDivider() {
+    for (int i = 0; i < 50; i++) {
+        cout << "-";
+    }
     cout << endl;
-};
-
-float Toppings(float& Credits) {
-    int Numbering = 1;
-    int Choose;
-    
-    string toppings[6] = {"Ham", "Mushroom", "Pepperoni", "Peppers", "Onion", "Extra Cheese"};  // Fixed typo
-    float Topping_price[6] = {0.80, 0.50, 1.0, 0.80, 0.40, 1.50};
-    
-    // Display toppings menu
-    for (int i = 0; i < 6; i++) {
-        cout << Numbering++ << ". " << toppings[i] << " [" << Topping_price[i] << "]" << endl;
-    }
-    cout << "0. Return to Main Menu" << endl;
-    
-    // User input
-    cout << "Please choose from the above toppings: ";
-    cin >> Choose;
-    
-    // Validate input
-    if (Choose >= 1 && Choose <= 6) {  // Check if options are between 1 and 6
-       float Current_price = Credits + Topping_price[Choose - 1];
-        cout << "You have addad " << toppings[Choose - 1] << "to your pizza. Your Current price is [" << Current_price << "]";  // Display selected topping
-        
-        Credits -= Topping_price[Choose - 1];  // Deduct price from credits
-        
-        cout << "Remaining Credits: " << Credits<< endl;  // Display remaining credits
-    } else if (Choose == 0) {
-        Main_Menu();  // Call Main_Menu function
-    } else {
-        cout << "Please select a valid option." << endl;  // Handle invalid input
-    }
-};
-
-//Orderding the pizza
-void OrderPizza(float &credit) {
-    int options;
-    
-   const string pizzaSizes[3] = {"Small", "Medium", "Large"};  // Array for pizza sizes
-    const float pizzaPrices[3] = {5.0, 8.50, 10.25};  // Array for pizza prices
-
-    // Display menu
-    cout << "Order Pizza - Select Size [Current Credits: " << credit << "]" << endl;
-    for (int i = 0; i < 3; i++) {
-        cout << i + 1 << ". " << pizzaSizes[i] << " [" << pizzaPrices[i] << " credit]" << endl;
-    }
-    cout << "4. Return to main menu" << endl;
-    
-    cout << "Pleas choose from the following options: " << endl;
-    cin >> options;
-    
-      if (options >= 1 && options <= 3) {  // Check if options are 1, 2, or 3
-        cout << "You have selected a " << pizzaSizes[options - 1] << " Pizza" << endl;  // Display selected size
-        float remaining_credits = credit - pizzaPrices[options - 1];  // Calculate remaining credits
-        Toppings(remaining_credits);  // Call Toppings function with remaining credits
-    } else if (options == 4) {
-        Main_Menu();  // Call Main_Menu function
-    } else {
-        cout << "Please select one of the following options." << endl;  // Handle invalid input
-    }
-};
-
-// Main Menu
-void Main_Menu()
-{
-    int Choose;
-    cout << "Main Menu" << endl;
-    cout << "1.Order Pizza [Current Balance: 0.0]" << endl;
-    cout << "2.Exit" << endl;
-
-    cout << "Please Choose a option: ";
-    cin >> Choose;
-
-    if (Choose == 1)
-    {
-         // adding credits
-    float Current_balance;
-
-    cout << "How much credits do you want to add: ";
-    cin >> Current_balance;
-        OrderPizza(Current_balance);
-    }
-    else if (Choose == 2)
-    {
-        exit;
-    }
-    else
-    {
-        cout << "Please choose one of the above options";
-    };
 }
 
-int main()
-{
-    // intro
-    Dividers();
-    cout << "UClan PIZZA" << endl;
-    Dividers();
+// Function to display the toppings menu and handle a single topping choice
+void chooseTopping(float& currentCredits, vector<string>& pizzaToppings, float& pizzaPrice) {
+    const string toppings[6] = { "Ham", "Mushroom", "Pepperoni", "Peppers", "Onion", "Extra Cheese" };
+    const float toppingPrices[6] = { 0.80f, 0.50f, 1.0f, 0.80f, 0.40f, 1.50f };
+    int choice;
 
-    // Main Menu
-    Main_Menu();
-};
+    // Display toppings menu
+    cout << "Choose Toppings [Current Balance: $" << fixed << setprecision(2) << currentCredits << "]\n";
+    for (int i = 0; i < 6; i++) {
+        cout << (i + 1) << ". " << toppings[i] << " [$" << toppingPrices[i] << "]" << endl;
+    }
+    cout << "0. Finish toppings selection\n";
+    cout << "Please choose a topping (1-6) or 0 to finish: ";
+    cin >> choice;
+
+    // Handle user choice
+    if (choice == 0) {
+        // Finish topping selection
+        return;
+    }
+    else if (choice >= 1 && choice <= 6) {
+        float price = toppingPrices[choice - 1];
+        if (currentCredits >= price) {
+            currentCredits -= price;
+            pizzaPrice += price;
+            pizzaToppings.push_back(toppings[choice - 1]);
+            cout << "Added " << toppings[choice - 1] << " to your pizza. Remaining balance: $" << currentCredits << endl;
+        }
+        else {
+            cout << "Not enough credits! Please add more credits.\n";
+            float addedCredits;
+            cout << "Enter additional credits: ";
+            cin >> addedCredits;
+            currentCredits += addedCredits;
+            cout << "Updated balance: $" << currentCredits << endl;
+        }
+    }
+    else {
+        cout << "Invalid option. Please choose a valid topping option.\n";
+    }
+}
+
+// Function to display the pizza size menu and handle user choice
+void orderPizzas(float& currentCredits) {
+    const string pizzaSizes[3] = { "Small", "Medium", "Large" };
+    const float pizzaPrices[3] = { 5.0f, 8.50f, 10.25f };
+    int choice;
+    vector<string> pizzaToppings;
+    float pizzaPrice = 0.0f;
+
+    while (true) {
+        drawDivider();
+        cout << "Order Pizza - Select Size [Current Balance: $" << fixed << setprecision(2) << currentCredits << "]\n";
+        for (int i = 0; i < 3; i++) {
+            cout << (i + 1) << ". " << pizzaSizes[i] << " [$" << pizzaPrices[i] << "]" << endl;
+        }
+        cout << "4. Finish ordering pizzas\n";
+        cout << "Please choose a pizza size (1-3) or 4 to finish: ";
+        cin >> choice;
+
+        if (choice >= 1 && choice <= 3) {
+            float price = pizzaPrices[choice - 1];
+            if (currentCredits >= price) {
+                currentCredits -= price;
+                pizzaPrice = price;  // Set pizza price based on selection
+
+                cout << "You have selected a " << pizzaSizes[choice - 1] << " Pizza.\n";
+
+                // Allow adding multiple toppings
+                while (true) {
+                    chooseTopping(currentCredits, pizzaToppings, pizzaPrice); // Single topping choice
+                    cout << "Current toppings on your pizza: ";
+                    for (const auto& topping : pizzaToppings) {
+                        cout << topping << " ";
+                    }
+                    cout << "\nDo you want to add more toppings? (1 for yes, 0 for no): ";
+                    int moreToppings;
+                    cin >> moreToppings;
+                    if (moreToppings == 0) {
+                        break; // Exit topping selection loop
+                    }
+                }
+
+                // Print receipt
+                drawDivider();
+                cout << "Receipt:\n";
+                cout << "Pizza Price: $" << fixed << setprecision(2) << pizzaPrice << endl;
+                cout << "Toppings Price: $" << fixed << setprecision(2) << (pizzaPrice - price) << endl;
+                cout << "Total Price: $" << fixed << setprecision(2) << pizzaPrice << endl;
+                cout << "Remaining Balance: $" << fixed << setprecision(2) << currentCredits << endl;
+                cout << "Toppings: ";
+                for (const auto& topping : pizzaToppings) {
+                    cout << topping << " ";
+                }
+                cout << "\n";
+
+            }
+            else {
+                cout << "Not enough credits! Please add more credits.\n";
+                float addedCredits;
+                cout << "Enter additional credits: ";
+                cin >> addedCredits;
+                currentCredits += addedCredits;
+                cout << "Updated balance: $" << currentCredits << endl;
+            }
+        }
+        else if (choice == 4) {
+            break;  // Finish ordering pizzas
+        }
+        else {
+            cout << "Invalid option. Please choose a valid pizza size option.\n";
+        }
+    }
+}
+
+// Main menu function to handle user choices
+void mainMenu() {
+    float currentCredits = 0.0f;
+    int choice;
+
+    while (true) {
+        drawDivider();
+        cout << "Main Menu\n";
+        cout << "1. Order Pizza [Current Balance: $" << fixed << setprecision(2) << currentCredits << "]\n";
+        cout << "2. Exit\n";
+        cout << "Please choose an option (1-2): ";
+        cin >> choice;
+
+        if (choice == 1) {
+            cout << "How much credits do you want to add: ";
+            cin >> currentCredits;
+            orderPizzas(currentCredits);
+        }
+        else if (choice == 2) {
+            exit(0);  // Exit the program
+        }
+        else {
+            cout << "Invalid option. Please choose a valid menu option.\n";
+        }
+    }
+}
+
+int main() {
+    // Intro
+    drawDivider();
+    cout << "UClan PIZZA\n";
+    drawDivider();
+
+    // Start the main menu
+    mainMenu();
+
+    return 0;
+}
