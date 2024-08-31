@@ -88,7 +88,8 @@ void orderPizzas(float& currentCredits) {
                 cout << "You have selected a " << pizzaSizes[choice - 1] << " Pizza.\n";
 
                 // Allow adding multiple toppings
-                while (true) {
+                bool Loop_break = true;
+                while (Loop_break) {
                     chooseTopping(currentCredits, pizzaToppings, pizzaPrice); // Single topping choice
                     cout << "Current toppings on your pizza: ";
                     for (const auto& topping : pizzaToppings) {
@@ -98,7 +99,7 @@ void orderPizzas(float& currentCredits) {
                     int moreToppings;
                     cin >> moreToppings;
                     if (moreToppings == 0) {
-                        break; // Exit topping selection loop
+                        Loop_break = false;
                     }
                 }
 
@@ -114,7 +115,7 @@ void orderPizzas(float& currentCredits) {
                     cout << topping << " ";
                 }
                 cout << "\n";
-
+                exit(0);
             }
             else {
                 cout << "Not enough credits! Please add more credits.\n";
